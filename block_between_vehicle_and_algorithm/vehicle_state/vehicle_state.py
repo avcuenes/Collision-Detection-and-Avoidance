@@ -12,11 +12,13 @@ from geometry_msgs.msg import Point,Twist,Accel
 from nav_msgs.msg import Odometry
 
 
-async def positon(drone):
+async def positon(drone,vehicle_ID):
     async for position in drone.telemetry.position():
         rclpy.init(args=None)
-        node = rclpy.create_node('Position_publisher')
-        publisher = node.create_publisher(Point, 'Position_Vehicle', 10)
+        publisher_node_name = 'Position_publisher_' + vehicle_ID
+        node = rclpy.create_node(publisher_node_name)
+        topic_name ='Position_Vehicle' + vehicle_ID
+        publisher = node.create_publisher(Point, topic_name, 10)
 
         msg = Point()
         def timer_callback():
@@ -39,11 +41,13 @@ async def positon(drone):
         rclpy.shutdown()
 
 
-async def velocity(drone):
+async def velocity(drone,vehicle_ID):
     async for velocity in drone.telemetry.velocity_ned():
         rclpy.init(args=None)
-        node = rclpy.create_node('Velocity_publisher')
-        publisher = node.create_publisher(Twist, 'Velocity_vehicle', 10)
+        publisher_node_name = 'Velocity_publisher_' + vehicle_ID
+        node = rclpy.create_node(publisher_node_name)
+        topic_name = 'Velocity_vehicle' + vehicle_ID
+        publisher = node.create_publisher(Twist, topic_name, 10)
 
         msg = Twist()
         def timer_callback():
@@ -66,17 +70,19 @@ async def velocity(drone):
         rclpy.shutdown()
 
 
-async def acceleration(drone):
+async def acceleration(drone,vehicle_ID):
     async for acceleration in drone.telemetry.imu():
         rclpy.init(args=None)
-        node = rclpy.create_node('Acceleration_publisher')
-        publisher = node.create_publisher(Accel, 'Acceleration_vehicle', 10)
+        publisher_node_name = 'Acceleration_publisher_' + vehicle_ID
+        node = rclpy.create_node(publisher_node_name)
+        topic_name = 'Acceleration_vehicle' + vehicle_ID
+        publisher = node.create_publisher(Accel, topic_name, 10)
 
         msg = Accel()
         def timer_callback():
-            msg.linear.x = acceleration.forward_m_s2
-            msg.linear.y = acceleration.right_m_s2
-            msg.linear.z = acceleration.down_m_s2
+            msg.linear.x = acceleration.acceleration_frd.forward_m_s2
+            msg.linear.y = acceleration.acceleration_frd.right_m_s2
+            msg.linear.z = acceleration.acceleration_frd.down_m_s2
             node.get_logger().info('Publishing: "%s"' % msg)
             publisher.publish(msg)
 
