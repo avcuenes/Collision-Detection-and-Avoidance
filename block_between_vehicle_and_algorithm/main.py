@@ -12,14 +12,14 @@ async def run():
     await drone.connect(system_address="udp://:14540")
 
     # Start the tasks
-    asyncio.ensure_future(positon(drone))
-    asyncio.ensure_future(velocity(drone))
+    asyncio.ensure_future(print_battery(drone))
+    #asyncio.ensure_future(velocity(drone))
     
 
 
 async def print_battery(drone):
-    async for battery in drone.telemetry.battery():
-        print(f"Battery: {battery.remaining_percent}")
+    async for battery in drone.telemetry.imu():
+        print(f"Battery: {battery.acceleration_frd.forward_m_s2}")
 
 
 async def print_gps_info(drone):
