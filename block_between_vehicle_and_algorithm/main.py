@@ -5,6 +5,7 @@ Mehmet Enes AVCU
 import asyncio
 from mavsdk import System
 from vehicle_state.vehicle_state import positon,velocity,acceleration
+from action.action import Action
 import sys
 
 async def run():
@@ -19,24 +20,11 @@ async def run():
     asyncio.ensure_future(positon(drone,vehicle_ID=vehicle_ID))
     asyncio.ensure_future(velocity(drone,vehicle_ID=vehicle_ID))
     asyncio.ensure_future(acceleration(drone,vehicle_ID=vehicle_ID))
+    A = Action(Drone=drone,Vehicle_ID=vehicle_ID)
+    asyncio.ensure_future(A.goto())
     
     #asyncio.ensure_future(velocity(drone))
     
-
-
-async def print_battery(drone):
-    async for battery in drone.telemetry.imu():
-        print(f"Battery: {battery.acceleration_frd.forward_m_s2}")
-
-
-async def print_gps_info(drone):
-    async for gps_info in drone.telemetry.gps_info():
-        print(f"GPS info: {gps_info}")
-
-
-async def print_in_air(drone):
-    async for in_air in drone.telemetry.in_air():
-        print(f"In air: {in_air}")
 
 
 

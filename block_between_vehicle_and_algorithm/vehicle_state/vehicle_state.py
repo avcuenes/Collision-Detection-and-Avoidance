@@ -7,12 +7,16 @@ from mavsdk import System
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String,Float32MultiArray
 from geometry_msgs.msg import Point,Twist,Accel
-from nav_msgs.msg import Odometry
 
 
-async def positon(drone,vehicle_ID):
+async def positon(drone,vehicle_ID:int):
+    """_summary_
+    This function read position data from vehicle and publish it
+    Args:
+        drone (_type_): _description_
+        vehicle_ID (int): _description_ Vehicle ID number
+    """
     async for position in drone.telemetry.position():
         rclpy.init(args=None)
         publisher_node_name = 'Position_publisher_' + vehicle_ID
@@ -41,7 +45,13 @@ async def positon(drone,vehicle_ID):
         rclpy.shutdown()
 
 
-async def velocity(drone,vehicle_ID):
+async def velocity(drone,vehicle_ID:int):
+    """_summary_
+    This function read velocity data from vehicle and publish it
+    Args:
+        drone (_type_): _description_
+        vehicle_ID (int): _description_ Vehicle ID number
+    """
     async for velocity in drone.telemetry.velocity_ned():
         rclpy.init(args=None)
         publisher_node_name = 'Velocity_publisher_' + vehicle_ID
@@ -70,7 +80,13 @@ async def velocity(drone,vehicle_ID):
         rclpy.shutdown()
 
 
-async def acceleration(drone,vehicle_ID):
+async def acceleration(drone,vehicle_ID:int):
+    """_summary_
+    This function read acceleration data from vehicle and publish it
+    Args:
+        drone (_type_): _description_
+        vehicle_ID (_type_): _description_ Vehicle ID number
+    """
     async for acceleration in drone.telemetry.imu():
         rclpy.init(args=None)
         publisher_node_name = 'Acceleration_publisher_' + vehicle_ID
