@@ -53,10 +53,51 @@ class Detection:
         for i in range(0,self.Number_of_Agent):
             self.Subscribe_Velocity_of_Agent(Vehicle_ID=i)
     
+    def Subscribe_Position_of_Agent(self,Vehicle_ID:int,args=None):
+        """
+        This function subscribe other agents velocity
+        """
+        rclpy.init(args=args)
+        node_name = 'position_subscribe_' + str(Vehicle_ID)
+        velocity_node = rclpy.create_node(node_name)
+        topic_name = 'Position_Vehicle' + str(Vehicle_ID)
+        self.Vehicle_ID = Vehicle_ID
+        print(topic_name)
+        subscription = velocity_node.create_subscription(Point, topic_name, self.Position_Callback, 10)
+        subscription  # prevent unused variable warning
+
+        if rclpy.ok():
+            rclpy.spin_once(velocity_node)
+
+        # Destroy the node explicitly
+        # (optional - otherwise it will be done automatically
+        # when the garbage collector destroys the node object)
+        velocity_node.destroy_node()
+        rclpy.shutdown()
+    
+    def Position_Callback(self,msg):
+        """
+        This function callback function of velocity message
+
+        Args:
+            msg (_type_): _description_
+        """
+        self.Position_of_Vehicles.append([self.Vehicle_ID,msg.x, msg.y, msg.z])        
+        
+    def Update_Position_of_Vehicles(self):
+        """
+        This function subscribe velocity of agents and update velocity of vehicles
+        """
+        self.Position_of_Vehicles = []
+        for i in range(0,self.Number_of_Agent):
+            self.Subscribe_Position_of_Agent(Vehicle_ID=i)
+    
+    
     def Update(self):
         """
         This function update all variable
         """
+        self.Update_Position_of_Vehicles()
         self.Update_Velocity_of_Vehicles()
         self.Update_relative_velocity()
     
@@ -78,7 +119,7 @@ class Detection:
     def Update_relative_position(self):
         """
         This function calculate relative position of agents respect to ID
-        """      
+        """  
     
     def Detection(self):
         """
