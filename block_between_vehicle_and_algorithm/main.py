@@ -10,18 +10,21 @@ import sys
 
 async def run():
     # Init the drone
-    drone = System()
-    connection_string = "udp://:145"
     vehicle_ID = sys.argv[1]
-    system_address = connection_string + str(int(vehicle_ID)*10 + 30)
+    system_add = "5004" + str(vehicle_ID)
+    drone = System(mavsdk_server_address="localhost", port=system_add)
+    connection_string = "udp://:1454"
+    
+    
+    system_address = connection_string + str(int(vehicle_ID))
     await drone.connect(system_address=system_address)
 
     # Start the tasks
-    asyncio.ensure_future(positon(drone,vehicle_ID=vehicle_ID))
+    #asyncio.ensure_future(positon(drone,vehicle_ID=vehicle_ID))
     asyncio.ensure_future(velocity(drone,vehicle_ID=vehicle_ID))
-    asyncio.ensure_future(acceleration(drone,vehicle_ID=vehicle_ID))
-    A = Action(Drone=drone,Vehicle_ID=vehicle_ID)
-    asyncio.ensure_future(A.goto())
+    #asyncio.ensure_future(acceleration(drone,vehicle_ID=vehicle_ID))
+    #A = Action(Drone=drone,Vehicle_ID=vehicle_ID)
+    #asyncio.ensure_future(A.goto())
     
     #asyncio.ensure_future(velocity(drone))
     

@@ -2,8 +2,6 @@
 Mehmet Enes AVCU    
 """
 import asyncio
-from turtle import pos
-from mavsdk import System
 import rclpy
 from rclpy.node import Node
 
@@ -56,7 +54,7 @@ async def velocity(drone,vehicle_ID:int):
         rclpy.init(args=None)
         publisher_node_name = 'Velocity_publisher_' + vehicle_ID
         node = rclpy.create_node(publisher_node_name)
-        topic_name = 'Velocity_vehicle' + vehicle_ID
+        topic_name = 'Velocity_vehicle' + str(vehicle_ID)
         publisher = node.create_publisher(Twist, topic_name, 10)
 
         msg = Twist()
@@ -67,7 +65,7 @@ async def velocity(drone,vehicle_ID:int):
             node.get_logger().info('Publishing: "%s"' % msg)
             publisher.publish(msg)
 
-        timer_period = 0.5  # seconds
+        timer_period = 0.1  # seconds
         timer = node.create_timer(timer_period, timer_callback)
 
         rclpy.spin_once(node)

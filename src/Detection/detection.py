@@ -53,10 +53,45 @@ class Detection:
         for i in range(0,self.Number_of_Agent):
             self.Subscribe_Velocity_of_Agent(Vehicle_ID=i)
     
+    def Update(self):
+        """
+        This function update all variable
+        """
+        self.Update_Velocity_of_Vehicles()
+        self.Update_relative_velocity()
+    
+    def Update_relative_velocity(self):
+        """
+        This function calculate relative velocity of agents respect to ID
+        """
+        self.relativevelocity = []
+        for i in range(0,self.Number_of_Agent-1):
+            if i == self.Vehicle_Own_ID:
+                break
+            else:
+                relative_velocity_x = self.Velocity_of_Vehicles[i][1] -self.Velocity_of_Vehicles[self.Vehicle_Own_ID][1]
+                relative_velocity_y = self.Velocity_of_Vehicles[i][2] -self.Velocity_of_Vehicles[self.Vehicle_Own_ID][2]
+                relative_velocity_z = self.Velocity_of_Vehicles[i][3] -self.Velocity_of_Vehicles[self.Vehicle_Own_ID][3]
+                relativeID = str(i) + str(self.Vehicle_Own_ID)
+                self.relativevelocity.append([relativeID, relative_velocity_x, relative_velocity_y, relative_velocity_z])
+    
+    def Update_relative_position(self):
+        """
+        This function calculate relative position of agents respect to ID
+        """      
+    
+    def Detection(self):
+        """
+        This function detect collision
+        """
+        
     def Run(self):
         """
         This function main function of detection algorithm
         """
+        self.Update()
+        
+        
         
             
         
