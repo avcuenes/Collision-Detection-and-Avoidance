@@ -26,27 +26,36 @@ class Action:
         self.lat = msg.x
         self.lon = msg.y
         self.alt = msg.z
+        print("ssssssssssss",msg)
         
     def goto_sub(self):
+        print("got")
         rclpy.init(args=None)
 
         g_node = rclpy.create_node('Position_subs')
-        topic_name ='Position_Vehicle' + str(self.Vehicle_ID)
+        topic_name ='Position_Vehicle' + str(1)
 
-        subscription = g_node.create_subscription(Point, topic_name, self.position_sub, 10)
-        subscription  # prevent unused variable warning
+        subscription = g_node.create_subscription(Point, topic_name, self.position_sub, 1)
 
         if rclpy.ok():
-            rclpy.spin_once(g_node)
+            print("ok")
+            rclpy.spin_once(g_node,timeout_sec=1)
         # Destroy the node explicitly
         # (optional - otherwise it will be done automatically
         # when the garbage collector destroys the node object)
-        g_node.destroy_node()
+        print("ros init")
+
         rclpy.shutdown()
         
     async def goto(self):
+        self.goto_sub()
+        #await asyncio.sleep(0.01)
+        await self.drone.action.goto_location(1,1,1,1)
         print(self.lat)
-        await  self.drone.action.goto_location(self.lat, self.lon, self.alt, 0)
+        #while 1:
+        #    self.goto_sub()
+        #    print("gptp")
+        #    #await  self.drone.action.goto_location(self.lat, self.lon, self.alt, 0)
         
 
 if __name__=="__main__":

@@ -170,6 +170,8 @@ class KalmanFilter:
         self.Observation_matrix[0][1] = 1
         self.Observation_matrix[1][3] = 1
         self.Observation_matrix[2][5] = 1
+    
+    
         
     def Run(self):
         self.define_dimensions_notation()

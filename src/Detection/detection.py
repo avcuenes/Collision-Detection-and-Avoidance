@@ -1,18 +1,22 @@
 """ 
 Mehmet Enes AVCU
 """
-from tkinter import NO
-from geometry_msgs.msg import Point,Twist,Accel
-import rclpy
-from rclpy.node import Node
 import sys
+
+import rclpy
+from geometry_msgs.msg import Accel, Point, Twist
+from lib.geomath import *
+from rclpy.node import Node
+import numpy as np
 
 
 class Detection:
-    def __init__(self,Vehicle_Own_ID:int, Number_of_Agent:float):
+    def __init__(self,Vehicle_Own_ID:int, Number_of_Agent:float, Min_distance_btw_agent:float):
         self.Vehicle_Own_ID = Vehicle_Own_ID 
         self.Number_of_Agent = Number_of_Agent
+        self.Min_distance = Min_distance_btw_agent
         self.Update_Velocity_of_Vehicles()
+        
 
     def Subscribe_Velocity_of_Agent(self,Vehicle_ID:int,args=None):
         """
@@ -93,20 +97,13 @@ class Detection:
             self.Subscribe_Position_of_Agent(Vehicle_ID=i)
     
     
-    def Update(self):
-        """
-        This function update all variable
-        """
-        self.Update_Position_of_Vehicles()
-        self.Update_Velocity_of_Vehicles()
-        self.Update_relative_velocity()
     
     def Update_relative_velocity(self):
         """
         This function calculate relative velocity of agents respect to ID
         """
         self.relativevelocity = []
-        for i in range(0,self.Number_of_Agent-1):
+        for i in range(0,self.Number_of_Agent):
             if i == self.Vehicle_Own_ID:
                 break
             else:
@@ -114,23 +111,83 @@ class Detection:
                 relative_velocity_y = self.Velocity_of_Vehicles[i][2] -self.Velocity_of_Vehicles[self.Vehicle_Own_ID][2]
                 relative_velocity_z = self.Velocity_of_Vehicles[i][3] -self.Velocity_of_Vehicles[self.Vehicle_Own_ID][3]
                 relativeID = str(i) + str(self.Vehicle_Own_ID)
-                self.relativevelocity.append([relativeID, relative_velocity_x, relative_velocity_y, relative_velocity_z])
+                relative_velocityxyz = np.sqrt(relative_velocity_x**2 + relative_velocity_y**2 + relative_velocity_z**2)
+                self.relativevelocity.append([relativeID,relative_velocityxyz, relative_velocity_x, relative_velocity_y, relative_velocity_z])
     
     def Update_relative_position(self):
         """
         This function calculate relative position of agents respect to ID
-        """  
-    
+        """
+        self.relativedistance = []
+        for i in range(0,self.Number_of_Agent):
+            if i == self.Vehicle_Own_ID:
+                break
+            else:
+                #latitude and longitude distance between agents
+                latlondistance = formulation_of_haversine(loc1=[self.Position_of_Vehicles[i][1],self.Position_of_Vehicles[i][2]],loc2=[self.Position_of_Vehicles[self.Vehicle_Own_ID][1],self.Position_of_Vehicles[self.Vehicle_Own_ID][2]])
+                #altitdude distance between agents
+                relativealtdistance = self.Position_of_Vehicles[i][3]-self.Position_of_Vehicles[self.Vehicle_Own_ID][3]
+                
+                relativedistance = np.sqrt(latlondistance**2 + relativealtdistance**2)
+                relativeverticaldistance = vertical_horizontal_haversine(loc1=[self.Position_of_Vehicles[i][1],self.Position_of_Vehicles[i][2]],loc2=[self.Position_of_Vehicles[self.Vehicle_Own_ID][1],self.Position_of_Vehicles[self.Vehicle_Own_ID][2]],ver_hor='v')
+                relativehorizontaldistance = vertical_horizontal_haversine(loc1=[self.Position_of_Vehicles[i][1],self.Position_of_Vehicles[i][2]],loc2=[self.Position_of_Vehicles[self.Vehicle_Own_ID][1],self.Position_of_Vehicles[self.Vehicle_Own_ID][2]],ver_hor='h')
+                
+                relativeID = str(i) + str(self.Vehicle_Own_ID)
+                self.relativedistance.append([relativeID , relativedistance,relativehorizontaldistance,relativeverticaldistance,relativealtdistance])
+
+        
+    def Detection_Calculation(self):
+        """
+        This function calculate detection formula
+        """
+        self.rij = []
+        for i in range(0,self.Number_of_Agent):
+            if i == self.Vehicle_Own_ID:
+                break
+            else:    
+                dij = [self.relativedistance[i][2],self.relativedistance[i][3],self.relativedistance[i][4]]
+                Vij = [self.relativevelocity[i][2],self.relativevelocity[i][3],self.relativevelocity[i][4]]
+                part1 = Vectoral_multiplication(vec1=dij,vec2=Vij)
+                part2 = Vector_norm(Vij)
+                part3 = part1/part2
+                part4 = part3*Vij
+                part5 = part4-dij
+                self.rij.append(part5)
+            
     def Detection(self):
         """
         This function detect collision
         """
+        self.Detection_Calculation()
+        self.norm_of_rij = []
+        for i in self.rij:
+            self.norm_of_rij.append(Vector_norm(i))
         
+        min_distance = min(self.norm_of_rij)
+        
+        if min_distance <= self.Min_distance:
+            Detection = True
+        else:
+            Detection = False
+        
+        return Detection
+
+        
+    def Update(self):
+        """
+        This function update all variable
+        """ 
+        self.Update_Position_of_Vehicles()
+        self.Update_Velocity_of_Vehicles()
+        self.Update_relative_velocity()
+        self.Update_relative_position()
     def Run(self):
         """
         This function main function of detection algorithm
         """
         self.Update()
+        self.Detection()
+        
         
         
         

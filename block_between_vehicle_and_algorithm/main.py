@@ -3,6 +3,7 @@ Mehmet Enes AVCU
 """
 
 import asyncio
+from turtle import position
 from mavsdk import System
 from vehicle_state.vehicle_state import positon,velocity,acceleration
 from action.action import Action
@@ -18,14 +19,18 @@ async def run():
     
     system_address = connection_string + str(int(vehicle_ID))
     await drone.connect(system_address=system_address)
-
+    print("connect")
     # Start the tasks
     #asyncio.ensure_future(positon(drone,vehicle_ID=vehicle_ID))
-    asyncio.ensure_future(velocity(drone,vehicle_ID=vehicle_ID))
-    #asyncio.ensure_future(acceleration(drone,vehicle_ID=vehicle_ID))
-    #A = Action(Drone=drone,Vehicle_ID=vehicle_ID)
-    #asyncio.ensure_future(A.goto())
-    
+    A = Action(Drone=drone,Vehicle_ID=vehicle_ID)
+    f1 = asyncio.ensure_future(positon(drone,vehicle_ID=vehicle_ID))
+
+    while True:
+            
+        #asyncio.ensure_future(acceleration(drone,vehicle_ID=vehicle_ID))
+        f2 = asyncio.ensure_future(A.goto())
+        await asyncio.wait([f2])
+        
     #asyncio.ensure_future(velocity(drone))
     
 

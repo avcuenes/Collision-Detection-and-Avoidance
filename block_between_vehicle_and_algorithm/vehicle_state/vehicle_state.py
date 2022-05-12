@@ -2,6 +2,7 @@
 Mehmet Enes AVCU    
 """
 import asyncio
+from socket import timeout
 import rclpy
 from rclpy.node import Node
 
@@ -17,6 +18,8 @@ async def positon(drone,vehicle_ID:int):
     """
     async for position in drone.telemetry.position():
         rclpy.init(args=None)
+        await asyncio.sleep(1)
+
         publisher_node_name = 'Position_publisher_' + vehicle_ID
         node = rclpy.create_node(publisher_node_name)
         topic_name ='Position_Vehicle' + vehicle_ID
@@ -30,10 +33,10 @@ async def positon(drone,vehicle_ID:int):
             node.get_logger().info('Publishing: "%s"' % msg)
             publisher.publish(msg)
 
-        timer_period = 0.5  # seconds
+        timer_period = 1/1  # seconds
         timer = node.create_timer(timer_period, timer_callback)
 
-        rclpy.spin_once(node)
+        rclpy.spin_once(node,timeout_sec = 0.1)
 
         # Destroy the timer attached to the node explicitly
         # (optional - otherwise it will be done automatically
@@ -45,12 +48,14 @@ async def positon(drone,vehicle_ID:int):
 
 async def velocity(drone,vehicle_ID:int):
     """_summary_
-    This function read velocity data from vehicle and publish it
+    This function sread velocity data from vehicle and publish it
     Args:
         drone (_type_): _description_
         vehicle_ID (int): _description_ Vehicle ID number
     """
+    print("vell1")
     async for velocity in drone.telemetry.velocity_ned():
+
         rclpy.init(args=None)
         publisher_node_name = 'Velocity_publisher_' + vehicle_ID
         node = rclpy.create_node(publisher_node_name)
@@ -65,10 +70,10 @@ async def velocity(drone,vehicle_ID:int):
             node.get_logger().info('Publishing: "%s"' % msg)
             publisher.publish(msg)
 
-        timer_period = 0.1  # seconds
+        timer_period = 1/250  # seconds
         timer = node.create_timer(timer_period, timer_callback)
 
-        rclpy.spin_once(node)
+        rclpy.spin_once(node,timeout_sec = 1/250)
 
         # Destroy the timer attached to the node explicitly
         # (optional - otherwise it will be done automatically
